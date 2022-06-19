@@ -1,0 +1,351 @@
+<?php
+
+namespace App\Services;
+
+use App\Repositories\AbstractRepository;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
+
+abstract class AbstractService
+{
+    /**
+     * @var AbstractRepository
+     */
+    protected $repository;
+
+    /**
+     * @var Request
+     */
+    protected $request;
+
+    /**
+     * @var array
+     */
+    protected $result;
+
+    /**
+     * @var array
+     */
+    protected $return;
+
+    /**
+     * @var array
+     */
+    protected $filtersOrder = [
+        'query',
+        'with',
+        'withNotEmpty',
+        'withEmpty',
+        'disabled',
+        'orderBy',
+        'orderByAsc',
+        'orderByDesc',
+        'paginated',
+        'limit',
+        'groupBy'
+    ];
+
+    /**
+     * Filter constructor.
+     *
+     * @param AbstractRepository $repository
+     */
+    protected function __construct(AbstractRepository $repository)
+    {
+        $this->repository = $repository;
+        $this->filtersOrder = array_merge($this->repository->getGuarded(), $this->filtersOrder);
+        $this->filtersOrder = array_merge($this->repository->getFillable(), $this->filtersOrder);
+    }
+
+    /**
+     * Method to get all Model Objects
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    public function all()
+    {
+        return $this->repository->all();
+    }
+
+    /**
+     * Method to get all records based in Request Information
+     *
+     * @param $columns
+     * @param Request $request
+     * @param string $format
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    public function get($columns, Request $request, $format = 'array')
+    {
+        $this->request = $request;
+        $this->result = $this->repository->select($columns);
+
+        if (empty($this->request->get('paginated'))) {
+            $this->request->merge(['paginated' => true]);
+        }
+
+        if (empty($this->request->get('limit'))) {
+            $this->request->merge(['limit' => 15]);
+        }
+
+        foreach ($this->filtersOrder as $key => $value) {
+            $filter = $this->request->get($value);
+
+            if (method_exists($this, $value) && !empty($filter)) {
+                $this->$value($filter);
+            } else {
+                if ($this->columnExists($value) && !empty($filter)) {
+                    $this->where($value, $filter);
+                }
+            }
+        }
+
+        $array = ($format === 'array') ? $this->result->toArray() : $this->result;
+        $results = (isset($array['data'])) ? $array['data'] : $array;
+
+        $this->return['data'] = (!empty($results['data'])) ? $results['data'] : $results;
+        // $this->return['count']  = (empty($request->get('query'))) ? $this->repository->count() : $this->result->count();
+        $this->return['count'] = $array['total'] ?? $this->result->count();
+        $this->return['filter'] = $this->result->count();
+
+        return $this->return;
+    }
+
+    /**
+     * Method to find Model Object
+     *
+     * @param $id
+     * @return mixed
+     */
+    public function find($id)
+    {
+        return $this->repository->find($id);
+    }
+
+    /**
+     * Method to get Model Object information
+     *
+     * @param int $id
+     * @return mixed
+     */
+    public function show($id)
+    {
+        return $this->repository->find($id);
+    }
+
+    /**
+     * Method to get Model Object by passed relation of Key => Value
+     *
+     * @param array $data
+     * @return \Illuminate\Database\Eloquent\Collection|static|static[]
+     */
+    public function findBy(array $data)
+    {
+        return $this->repository->findBy($data);
+    }
+
+    /**
+     * Method to create Model Object
+     *
+     * @param array $data
+     * @return mixed
+     */
+    public function create(array $data)
+    {
+        return $this->repository->create($data);
+    }
+
+    /**
+     * Method to update Model Object
+     *
+     * @param array $data
+     * @param int $id
+     * @return mixed
+     */
+    public function update(array $data, int $id)
+    {
+        $elem = $this->repository->find($id);
+        $elem->update($data);
+
+        return $elem;
+    }
+
+    /**
+     * Method to remove Model Object
+     *
+     * @param $id
+     * @return array
+     * @throws \Exception
+     */
+    public function delete($id)
+    {
+        if ($this->repository->delete($id)) {
+            return [];
+        }
+    }
+
+    /**
+     * Method to get (or not) Disabled Model Objects
+     *
+     * @param $value
+     */
+    public function disabled($value)
+    {
+        if (!$value) {
+            if ($this->columnExists('status')) {
+                $this->result->where('status', 1);
+            }
+        }
+    }
+
+    /**
+     * Method to paginate rows
+     *
+     * @param $value
+     */
+    private function paginated($value): void
+    {
+        $value = json_decode($value);
+
+        if ($value) {
+            $this->result = $this->result->paginate($this->request->get('limit'));
+
+            $this->return['page'] = $this->result->currentPage() - 1;
+            $this->return['pages'] = $this->result->lastPage();
+        } else {
+            $this->result = $this->result->get();
+        }
+    }
+
+    /**
+     * Method to get rows with some associated Table Information
+     *
+     * @param $value
+     * @throws \ReflectionException
+     */
+    private function with($value): void
+    {
+        $this->result = $this->repository->withRelationIfExists($this->result, $value);
+    }
+
+    /**
+     * Method to get rows with some associated Table Information
+     *
+     * @param $value
+     * @throws \ReflectionException
+     */
+    private function withNotEmpty($value): void
+    {
+        $this->result = $this->repository->withRelationIfNotEmpty($this->result, $value);
+    }
+
+    /**
+     * Method to get rows who doesn't have relation (It's empty)
+     *
+     * @param $value
+     * @throws \ReflectionException
+     */
+    private function withEmpty($value): void
+    {
+        $this->result = $this->repository->withRelationEmpty($this->result, $value);
+    }
+
+    /**
+     * Method to Order Rows by passed Columns
+     *
+     * @param array|string $value
+     */
+    private function orderByAsc($value): void
+    {
+        if (is_array($value)) {
+            foreach ($value as $filter) {
+                $this->result = $this->result->orderBy($filter);
+            }
+            return;
+        }
+
+        $this->result = $this->result->orderBy($value);
+    }
+
+    /**
+     * Method to Order Rows by passed Columns
+     *
+     * @param array|string $value
+     */
+    private function orderByDesc($value): void
+    {
+        if (is_array($value)) {
+            foreach ($value as $filter) {
+                $this->result = $this->result->orderByDesc($filter);
+            }
+            return;
+        }
+
+        $this->result = $this->result->orderByDesc($value);
+    }
+
+    /**
+     * Method to check if Column Exists in Eloquent Model
+     *
+     * @param $value
+     * @return mixed
+     */
+    private function columnExists($value): bool
+    {
+        return Schema::hasColumn($this->repository->getTable(), $value);
+    }
+
+    /**
+     * Method to get Model Objects by passed Condition
+     *
+     * @param $key
+     * @param $value
+     */
+    private function where($key, $value): void
+    {
+        if (!((int)$value)) {
+            $this->result = $this->result->where(function ($query) use ($key, $value) {
+                $query->whereRaw("LOWER({$key}) LIKE LOWER(?)", '%' . $value . '%');
+            });
+        } else {
+            if (is_array($value)) {
+                $this->result = $this->result->whereIn($key, $value);
+            } else {
+                $this->result = $this->result->where($key, $value);
+            }
+        }
+    }
+
+    /**
+     * Method to get Model Objects by passed Condition
+     *
+     * @param $value
+     */
+    private function query($value): void
+    {
+        $columns = array_merge($this->repository->getGuarded(), $this->repository->getFillable());
+        foreach ($columns as $column) {
+            $type = Schema::getColumnType($this->repository->getTable(), $column);
+
+            if ($type != 'integer' && $type != 'boolean') {
+                if (!in_array(gettype($value), ['integer', 'boolean'])) {
+                    $this->result = $this->result->orWhere($column, 'LIKE', '%' . $value . '%');
+                }
+            } else {
+                if (!in_array(gettype($value), ['string', 'text'])) {
+                    $this->result = $this->result->orWhere($column, $value);
+                }
+            }
+        }
+    }
+
+    /**
+     * Method to Group Model Objects by passed column
+     *
+     * @param $column
+     */
+    private function groupBy($column): void
+    {
+        $this->result = $this->result->groupBy($column);
+    }
+}
