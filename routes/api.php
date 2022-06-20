@@ -52,6 +52,7 @@ Route::group([
         | Task Routes
         |--------------------------------------------------------------------------
         */
+        Route::post('tasks/finishTask/{id}', 'TaskController@finishTask');
         Route::resource('tasks', 'TaskController');
     });
 });

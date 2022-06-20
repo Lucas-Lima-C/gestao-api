@@ -35,4 +35,19 @@ class TaskController extends BaseController
         }
         return response()->json($condition['message'], 500);
     }
+
+    /**
+     * Method to finish Task
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|mixed
+     */
+    public function finishTask($id)
+    {
+        $condition = $this->service->finishTask($id);
+        if ($condition['status'] === '00') {
+            return response()->json('Tarefa concluída com sucesso', 201);
+        }
+        return response()->json($condition['message'], 500);
+    }
 }
