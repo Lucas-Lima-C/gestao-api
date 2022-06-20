@@ -52,7 +52,6 @@
             padding: 12px;
             width: 100%;
             cursor: pointer;
-            margin-top: 4px;
             margin-bottom: 15px;
             border: none;
             border-radius: 2px;
@@ -82,7 +81,7 @@
         </div>
 
         <div class="card-body">
-            <p class="text-center" style="margin-top:45px;font-weight:bold;font-size:20px;color:forestgreen;">OK! A senha foi alterada com sucesso.</p>
+            <p class="text-center" style="font-weight:bold;font-size:20px;color:forestgreen;">OK! A senha foi alterada com sucesso.</p>
         </div>
     </div>
 </body>

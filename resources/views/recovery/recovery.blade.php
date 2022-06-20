@@ -24,7 +24,7 @@
 
         .card-header {
             padding: 14px;
-            background-color: #6908b9 !important;
+            background-color: #1194d0 !important;
             color: #000;
         }
 
@@ -57,12 +57,12 @@
             border: none;
             border-radius: 2px;
             font-size: 15px;
-            background-color: #6908b9 !important;
+            background-color: #1194d0 !important;
             font-family: 'Raleway', sans-serif;
         }
 
         .card-body button:hover {
-            background-color: #6908b9;
+            background-color: #1194d0;
         }
 
         .text-center {
@@ -92,14 +92,14 @@
                     <label for="password" class="col-md-4 col-form-label text-md-right">Senha</label>
 
                     <div class="col-md-6">
-                        <input id="password" type="password" class="form-control" name="password" placeholder="password" value="{{ old('password') }}" required>
+                        <input id="password" type="password" class="form-control" name="password" value="{{ old('password') }}" required>
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <label for="password-confirm" class="col-md-4 col-form-label text-md-right">Confirme a Senha</label>
                     <div class="col-md-6">
-                        <input id="password-confirm" type="password" class="form-control" name="password_confirmation" placeholder="password confirmation" value="{{ old('password_confirmation') }}" required>
+                        <input id="password-confirm" type="password" class="form-control" name="password_confirmation" value="{{ old('password_confirmation') }}" required>
                     </div>
                 </div>
 

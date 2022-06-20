@@ -32,11 +32,6 @@ class UserRecoveryService extends BaseService
             return ['status' => '01', 'message' => 'Usuário não encontrado.'];
         }
 
-        if(trim($user->email) == ''){
-            DB::rollBack();
-            return ['status' => '01', 'message' => 'E-mail não cadastrado. Procure a central de apoio ao colaborador.'];
-        }
-        
         $new  = $this->repository->create(['user_id' => $user->id, 'token' => md5(uniqid(rand(), true))]);
 
         if($new){
