@@ -54,5 +54,13 @@ Route::group([
         */
         Route::post('tasks/finishTask/{id}', 'TaskController@finishTask');
         Route::resource('tasks', 'TaskController');
+
+        /*
+        |--------------------------------------------------------------------------
+        | MailReceiver Routes
+        |--------------------------------------------------------------------------
+        */
+        Route::post('mailReceivers/change/{id}', 'MailReceiverController@change');
+        Route::resource('mailReceivers', 'MailReceiverController');
     });
 });
