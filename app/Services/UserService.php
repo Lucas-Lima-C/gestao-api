@@ -4,12 +4,12 @@ namespace App\Services;
 
 use App\Models\User;
 use LaravelAux\BaseService;
-use App\Models\MailReceiver;
-use App\Mail\sendNotificationMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Mail;
+use App\Models\MailReceiver;
+use App\Mail\sendNotificationMail;
 use Illuminate\Support\Facades\Storage;
 
 class UserService extends BaseService

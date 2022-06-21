@@ -37,6 +37,32 @@ class TaskController extends BaseController
     }
 
     /**
+     * Method to update User Information
+     *
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse|mixed
+     */
+    public function update(Request $request, int $id)
+    {
+        $this->validation();
+        $condition = $this->service->update($request->all(), $id);
+        if ($condition['status'] === '00') {
+            return response()->json('Registro atualizado com sucesso', 201);
+        }
+        return response()->json($condition['message'], 500);
+    }
+
+    public function destroy($id)
+    {
+        $condition = $this->service->delete($id);
+        if ($condition['status'] === '00') {
+            return response()->json('Registro deletado com sucesso', 201);
+        }
+        return response()->json($condition['message'], 500);
+    }
+
+    /**
      * Method to finish Task
      *
      * @param Request $request

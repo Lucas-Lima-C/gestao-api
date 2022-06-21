@@ -47,7 +47,16 @@ class UserController extends BaseController
         $this->validation();
         $condition = $this->service->update($request->all(), $id);
         if ($condition['status'] === '00') {
-            return response()->json('Registro criado com sucesso', 201);
+            return response()->json('Registro atualizado com sucesso', 201);
+        }
+        return response()->json($condition['message'], 500);
+    }
+
+    public function destroy($id)
+    {
+        $condition = $this->service->delete($id);
+        if ($condition['status'] === '00') {
+            return response()->json('Registro deletado com sucesso', 201);
         }
         return response()->json($condition['message'], 500);
     }
