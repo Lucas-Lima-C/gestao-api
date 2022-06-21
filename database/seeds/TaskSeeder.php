@@ -14,44 +14,44 @@ class TaskSeeder extends Seeder
     {
         $rows = [
             [
-                'title' => 'Ler um livro',
+                'name' => 'Ler um livro',
                 'date_of_conclusion' => '2022-07-30',
                 'status' => 'Pendente'
             ],
             [
-                'title' => 'Gerar backup',
+                'name' => 'Gerar backup',
                 'date_of_conclusion' => '2022-08-02',
                 'status' => 'Pendente'
             ],
             [
-                'title' => 'Caminhada',
+                'name' => 'Caminhada',
                 'date_of_conclusion' => '2022-07-25',
                 'status' => 'Concluido'
             ],
             [
-                'title' => 'Academia',
+                'name' => 'Academia',
                 'date_of_conclusion' => '2022-09-05',
                 'status' => 'Concluido'
             ],
             [
-                'title' => 'Finalizar API',
+                'name' => 'Finalizar API',
                 'date_of_conclusion' => '2022-07-25',
                 'status' => 'Concluido'
             ],
             [
-                'title' => 'Criar nova tela',
+                'name' => 'Criar nova tela',
                 'date_of_conclusion' => '2022-06-05',
                 'status' => 'Pendente'
             ],
             [
-                'title' => 'Manutenção',
+                'name' => 'Manutenção',
                 'date_of_conclusion' => '2022-06-02',
                 'status' => 'Pendente'
             ],
         ];
 
         foreach ($rows as $row) {
-            $exists = Task::where('title', $row['title'])->first();
+            $exists = Task::where('name', $row['name'])->first();
             if ($exists) {
                 $exists->update($row);
                 continue;

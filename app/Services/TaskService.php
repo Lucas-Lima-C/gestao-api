@@ -137,15 +137,7 @@ class TaskService extends BaseService
     {
         try {
             $receiver = User::find(MailReceiver::first()->value('user_id'));
-
-            $task["name"] = $task["title"];
-            unset($task["title"]);
-
-            if(isset($previousData['title'])){
-                $previousData["name"] = $previousData["title"];
-                unset($previousData["title"]);
-            }
-
+            
             $data = [
                 "name" => $receiver->name,
                 "register" => $task,

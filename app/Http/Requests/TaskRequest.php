@@ -14,7 +14,7 @@ class TaskRequest extends BaseRequest
     public function rules()
     {
         return [
-            'title' => 'required',
+            'name' => 'required',
             'date_of_conclusion' => 'required'
         ];
     }
@@ -39,7 +39,7 @@ class TaskRequest extends BaseRequest
     public function attributes()
     {
         return [
-            'title' => 'Título',
+            'name' => 'Título',
             'date_of_conclusion' => 'Data de Conclusão'
         ];
     }

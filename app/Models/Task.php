@@ -12,7 +12,7 @@ class Task extends Model
     ];
 
     protected $fillable = [
-        'title', 'date_of_conclusion', 'status'
+        'name', 'date_of_conclusion', 'status'
     ];
 
     protected $appends = [
