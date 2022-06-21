@@ -2,17 +2,19 @@
 
 ## Project setup
 
-1 - Configure o .env
+1 - Configure o .env e as variáveis MAIL
 
 2 - composer install
 
-3 - php artisan migrate
+3 - php artisan key:generate && php artisan jwt:secret
 
-4 - php artisan db:Seed
+4 - php artisan migrate
 
-5 - php artisan queue:work
+6 - php artisan db:Seed
 
-6 - php artisan serve
+7 - php artisan queue:work
+
+8 - php artisan serve
 
 ## Acesso
 
