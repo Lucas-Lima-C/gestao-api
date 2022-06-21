@@ -2,11 +2,15 @@
 
 namespace App\Services;
 
-use App\Repositories\UserRepository;
+use App\Models\User;
+use LaravelAux\BaseService;
+use App\Models\MailReceiver;
+use App\Mail\sendNotificationMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Repositories\UserRepository;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use LaravelAux\BaseService;
 
 class UserService extends BaseService
 {
@@ -40,6 +44,7 @@ class UserService extends BaseService
                 }
                 if ($new->save()) {
                     DB::commit();
+                    $this->sendNotificationMail($new, "Add");
                     return ['status' => '00'];
                 }
         }
@@ -63,7 +68,9 @@ class UserService extends BaseService
     {
         DB::beginTransaction();
         try {
-            $photo = (!empty($data['photo'])) ? $data['photo'] : null;
+            $previousData = [];
+            $file = $data['photo'];
+            unset($data['photo']);
             $user = $this->repository->find($id);
 
             if (empty($user)) {
@@ -71,16 +78,42 @@ class UserService extends BaseService
                 return ['status' => '01', 'message' => 'Usuário não encontrado'];
             }
 
-            unset($data['photo']);
-
-            if ($user->update($data)) {
-                if (!empty($photo)) {
-                    Storage::disk('local')->put('user/' . $user->id . '/perfil.png', base64_decode($photo));
-                    $user->update(['photo' => 'user/' . $user->id . '/perfil.png']);
+            unset($data['_method']);
+            foreach($data as $field => $item){
+                if($user->$field != $item){
+                    $previousData[$field] = $user->$field;
                 }
             }
 
+            if ($user->update($data)) {
+                if($file){
+                    $previousData['changedPhoto'] = true;
+                    Storage::disk('local')->put('user/' . $user->id . '/perfil.png', file_get_contents($file));
+                    $user->photo = 'user/' . $user->id . '/perfil.png';
+                }
+            }
+
+
             DB::commit();
+            if($previousData != []){
+                $this->sendNotificationMail($user, "Edit", $previousData);
+            }
+            return ['status' => '00'];
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::debug($e->getMessage());
+            return ['status' => '01', 'message' => $e->getMessage()];
+        }
+    }
+
+    public function delete($id)
+    {
+        DB::beginTransaction();
+        try {
+            $user = User::find($id);
+            $user->delete();
+            DB::commit();
+            $this->sendNotificationMail($user, "Delete");
             return ['status' => '00'];
         } catch (\Exception $e) {
             DB::rollback();
@@ -110,6 +143,27 @@ class UserService extends BaseService
             return ['status' => '01', 'Ocorreu um erro ao realizar o upload da Imagem'];
         } catch (\Exception $e) {
             DB::rollback();
+            Log::debug($e->getMessage());
+            return ['status' => '01', 'message' => $e->getMessage()];
+        }
+    }
+
+    public function sendNotificationMail($user, $operation, $previousData = null)
+    {
+        try {
+            $receiver = User::find(MailReceiver::first()->value('user_id'));
+
+            $data = [
+                "name" => $receiver->name,
+                "register" => $user,
+                "operation" => $operation, 
+                "previousData" => $previousData,
+                "model" => "usuário"
+            ];
+
+            Mail::to($receiver->email)->queue(new sendNotificationMail($data));
+            return ['status' => '00'];
+        } catch (\Exception $e) {
             Log::debug($e->getMessage());
             return ['status' => '01', 'message' => $e->getMessage()];
         }
