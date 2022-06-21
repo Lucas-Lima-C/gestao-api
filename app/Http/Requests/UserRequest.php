@@ -18,8 +18,8 @@ class UserRequest extends BaseRequest
             case "POST":
                 $rules = [
                     'name' => 'required',
-                    'email' => 'required|unique:users',
-                    'password' => 'required',
+                    'email' => 'required|unique:users|email:rfc,dns',
+                    'password' => 'required|min:6',
                 ];
                 break;
             case "PUT":
@@ -43,7 +43,8 @@ class UserRequest extends BaseRequest
         return [
             'required' => ':attribute é obrigatório',
             'email.unique' => 'O :attribute informado já está sendo utilizado',
-            'integer' => 'O campo :attribute deve ser um número',
+            'email.email' => 'O :attribute não é válido',
+            'min' => 'A :attribute precisa ter no mínimo 6 caracteres',
         ];
     }
 

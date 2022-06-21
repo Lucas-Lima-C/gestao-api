@@ -90,6 +90,7 @@ class UserService extends BaseService
                     $previousData['changedPhoto'] = true;
                     Storage::disk('local')->put('user/' . $user->id . '/perfil.png', file_get_contents($file));
                     $user->photo = 'user/' . $user->id . '/perfil.png';
+                    $user->save();
                 }
             }
 
