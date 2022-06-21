@@ -12,6 +12,8 @@
 
 5 - php artisan queue:work
 
+6 - php artisan serve
+
 ## Acesso
 
 Email: lucas.lima.c@outlook.com

@@ -16,7 +16,6 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Lucas Lima do Couto',
                 'email' => 'lucas.lima.c@outlook.com',
-                'photo' => 'user/1/perfil.png',
                 'password' => 'password'
             ]
         ];
