@@ -20,12 +20,6 @@ class TaskController extends BaseController
         parent::__construct($service, new TaskRequest);
     }
 
-    /**
-     * Method to create Task
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse|mixed
-     */
     public function store(Request $request)
     {
         $this->validation();
@@ -36,13 +30,6 @@ class TaskController extends BaseController
         return response()->json($condition['message'], 500);
     }
 
-    /**
-     * Method to update User Information
-     *
-     * @param Request $request
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse|mixed
-     */
     public function update(Request $request, int $id)
     {
         $this->validation();
@@ -62,12 +49,6 @@ class TaskController extends BaseController
         return response()->json($condition['message'], 500);
     }
 
-    /**
-     * Method to finish Task
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse|mixed
-     */
     public function finishTask($id)
     {
         $condition = $this->service->finishTask($id);
@@ -75,5 +56,14 @@ class TaskController extends BaseController
             return response()->json('Tarefa concluída com sucesso', 201);
         }
         return response()->json($condition['message'], 500);
+    }
+
+    public function indicators()
+    {
+        $data = $this->service->indicators();
+        if ($data['status'] === '00') {
+            return response()->json($data['data'], 201);
+        }
+        return response()->json($data['condition']['message'], 500);
     }
 }

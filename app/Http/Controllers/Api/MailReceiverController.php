@@ -19,9 +19,9 @@ class MailReceiverController extends BaseController
         parent::__construct($service, new MailReceiverRequest);
     }
 
-    public function change($id)
+    public function changeMailReceiver($id)
     {
-        $condition = $this->service->change($id);
+        $condition = $this->service->changeMailReceiver($id);
         if ($condition['status'] === '00') {
             return response()->json('Recebedor de e-mail alterado com sucesso', 201);
         }

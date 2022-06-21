@@ -12,7 +12,7 @@
 */
 
 Route::get('/', function () {
-    return view('Siga os padrões e lembre-se que estamos de olho em você :)');
+    return view('welcome');
 });
 
 Route::get('/user/image/{id}', 'Api\UserController@image');

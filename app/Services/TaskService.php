@@ -7,7 +7,7 @@ use App\Models\Task;
 use App\Models\User;
 use LaravelAux\BaseService;
 use App\Models\MailReceiver;
-use App\Mail\sendNotificationMail;
+use App\Mail\SendNotificationMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Repositories\TaskRepository;
@@ -25,12 +25,6 @@ class TaskService extends BaseService
         parent::__construct($repository);
     }
 
-    /**
-     * Method to create an Task
-     *
-     * @param array $data
-     * @return array|mixed
-     */
     public function create(array $data)
     {
         DB::beginTransaction();
@@ -107,12 +101,6 @@ class TaskService extends BaseService
         }
     }
 
-    /**
-     * Method to finish a Task
-     *
-     * @param array $data
-     * @return array|mixed
-     */
     public function finishTask(int $id)
     {
         DB::beginTransaction();
@@ -133,6 +121,24 @@ class TaskService extends BaseService
         }
     }
 
+    public function indicators()
+    {
+        try {
+            $pendingTasks = Task::where('status', 'Pendente')->whereDate('date_of_conclusion', '>=', Carbon::now())->count();
+            $lateTasks = Task::where('status', 'Pendente')->whereDate('date_of_conclusion', '<', Carbon::now())->count();
+            $finishedTasks = Task::where('status', 'Concluido')->count();
+
+            return ['status' => '00', 'data' => [
+                'pendingTasks' => $pendingTasks,
+                'lateTasks' => $lateTasks,
+                'finishedTasks' => $finishedTasks,
+            ]];
+        } catch (\Exception $e) {
+            Log::debug($e->getMessage());
+            return ['status' => '01', 'message' => $e->getMessage()];
+        }
+    }
+
     public function sendNotificationMail($task, $operation, $previousData = null)
     {
         try {
@@ -146,7 +152,7 @@ class TaskService extends BaseService
                 "model" => "tarefa"
             ];
 
-            Mail::to($receiver->email)->queue(new sendNotificationMail($data));
+            Mail::to($receiver->email)->queue(new SendNotificationMail($data));
             return ['status' => '00'];
         } catch (\Exception $e) {
             Log::debug($e->getMessage());

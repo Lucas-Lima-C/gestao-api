@@ -39,7 +39,7 @@ class TaskRequest extends BaseRequest
     public function attributes()
     {
         return [
-            'name' => 'Título',
+            'name' => 'Nome',
             'date_of_conclusion' => 'Data de Conclusão'
         ];
     }

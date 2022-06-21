@@ -19,12 +19,6 @@ class UserController extends BaseController
         parent::__construct($service, new UserRequest());
     }
 
-    /**
-     * Method to create User
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse|mixed
-     */
     public function store(Request $request)
     {
         $this->validation();
@@ -35,13 +29,6 @@ class UserController extends BaseController
         return response()->json($condition['message'], 500);
     }
 
-    /**
-     * Method to update User Information
-     *
-     * @param Request $request
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse|mixed
-     */
     public function update(Request $request, int $id)
     {
         $this->validation();
@@ -61,12 +48,6 @@ class UserController extends BaseController
         return response()->json($condition['message'], 500);
     }
 
-    /**
-     * Method to get User Profile Image
-     *
-     * @param $id
-     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Symfony\Component\HttpFoundation\Response
-     */
     public function image($id)
     {
         $user = $this->service->find($id);

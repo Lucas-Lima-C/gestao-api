@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Mail;
 use App\Models\MailReceiver;
-use App\Mail\sendNotificationMail;
+use App\Mail\SendNotificationMail;
 use Illuminate\Support\Facades\Storage;
 
 class UserService extends BaseService
@@ -24,12 +24,6 @@ class UserService extends BaseService
         parent::__construct($repository);
     }
 
-    /**
-     * Method to create an User
-     *
-     * @param array $data
-     * @return array|mixed
-     */
     public function create(array $data)
     {
         DB::beginTransaction();
@@ -42,12 +36,11 @@ class UserService extends BaseService
                     Storage::disk('local')->put('user/' . $new->id . '/perfil.png', file_get_contents($file));
                     $new->photo = 'user/' . $new->id . '/perfil.png';
                 }
-                if ($new->save()) {
-                    DB::commit();
-                    $this->sendNotificationMail($new, "Add");
-                    return ['status' => '00'];
-                }
-        }
+                $new->save();
+                DB::commit();
+                $this->sendNotificationMail($new, "Add");
+                return ['status' => '00'];
+            }
             DB::rollback();
             return ['status' => '01', 'message' => 'Ocorreu um erro durante a criação do registro'];
         } catch (\Exception $e) {
@@ -57,20 +50,16 @@ class UserService extends BaseService
         }
     }
 
-    /**
-     * Method to update User Information
-     *
-     * @param array $data
-     * @param int $id
-     * @return array|mixed
-     */
     public function update(array $data, int $id)
     {
         DB::beginTransaction();
         try {
             $previousData = [];
+
             $file = $data['photo'];
             unset($data['photo']);
+            unset($data['_method']);
+
             $user = $this->repository->find($id);
 
             if (empty($user)) {
@@ -78,22 +67,20 @@ class UserService extends BaseService
                 return ['status' => '01', 'message' => 'Usuário não encontrado'];
             }
 
-            unset($data['_method']);
             foreach($data as $field => $item){
                 if($user->$field != $item){
                     $previousData[$field] = $user->$field;
                 }
             }
 
-            if ($user->update($data)) {
-                if($file){
-                    $previousData['changedPhoto'] = true;
-                    Storage::disk('local')->put('user/' . $user->id . '/perfil.png', file_get_contents($file));
-                    $user->photo = 'user/' . $user->id . '/perfil.png';
-                    $user->save();
-                }
-            }
+            $user->update($data);
 
+            if($file){
+                $previousData['changedPhoto'] = true;
+                Storage::disk('local')->put('user/' . $user->id . '/perfil.png', file_get_contents($file));
+                $user->photo = 'user/' . $user->id . '/perfil.png';
+                $user->save();
+            }
 
             DB::commit();
             if($previousData != []){
@@ -123,32 +110,6 @@ class UserService extends BaseService
         }
     }
 
-    /**
-     * Method to update User Profile Image
-     *
-     * @param array $data
-     * @param integer $id
-     * @return array
-     */
-    public function updateImage(array $data, $id)
-    {
-        DB::beginTransaction();
-        try {
-            $user = $this->repository->find($id);
-            if ($user->update(['photo' => 'user/' . $user->id . '/perfil.png'])) {
-                Storage::disk('local')->put('user/' . $user->id . '/perfil.png', file_get_contents($data['photo']));
-                DB::commit();
-                return ['status' => '00'];
-            }
-            DB::rollback();
-            return ['status' => '01', 'Ocorreu um erro ao realizar o upload da Imagem'];
-        } catch (\Exception $e) {
-            DB::rollback();
-            Log::debug($e->getMessage());
-            return ['status' => '01', 'message' => $e->getMessage()];
-        }
-    }
-
     public function sendNotificationMail($user, $operation, $previousData = null)
     {
         try {
@@ -162,7 +123,7 @@ class UserService extends BaseService
                 "model" => "usuário"
             ];
 
-            Mail::to($receiver->email)->queue(new sendNotificationMail($data));
+            Mail::to($receiver->email)->queue(new SendNotificationMail($data));
             return ['status' => '00'];
         } catch (\Exception $e) {
             Log::debug($e->getMessage());

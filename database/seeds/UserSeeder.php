@@ -22,14 +22,12 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($rows as $row) {
-            if(!User::find(1) && !$exists = User::where('email', $row['email'])->first()){
-                $exists = User::where('email', $row['email'])->first();
-                if ($exists) {
-                    $exists->update($row);
-                    continue;
-                }
-                User::create($row);
+            $exists = User::where('email', $row['email'])->first();
+            if ($exists) {
+                $exists->update($row);
+                continue;
             }
+            User::create($row);
         }
     }
 }

@@ -20,13 +20,7 @@ class MailReceiverService extends BaseService
         parent::__construct($repository);
     }
 
-    /**
-     * Method to finish a Task
-     *
-     * @param array $data
-     * @return array|mixed
-     */
-    public function change(int $id)
+    public function changeMailReceiver(int $id)
     {
         DB::beginTransaction();
         try {

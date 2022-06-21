@@ -1,8 +1,19 @@
-# Template API
+# gestao-api
 
-configure o .env
+## Project setup
 
-composer install
+1 - Configure o .env
 
-php artisan migrate
+2 - composer install
+
+3 - php artisan migrate
+
+4 - php artisan db:Seed
+
+5 - php artisan queue:work
+
+## Acesso
+
+Email: lucas.lima.c@outlook.com
+Password: password
 

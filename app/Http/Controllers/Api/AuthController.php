@@ -46,7 +46,6 @@ class AuthController
     
             unset($return['password']);
     
-            //$return['photo'] = isset($return['photo']) ? env('APP_URL') . $return['photo'] : null;
             $return['access_token'] = $token;
             $return['token_type'] = 'bearer';
             $return['expires_in'] = 3600 * 8;

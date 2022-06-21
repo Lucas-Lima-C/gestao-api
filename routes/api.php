@@ -52,6 +52,7 @@ Route::group([
         | Task Routes
         |--------------------------------------------------------------------------
         */
+        Route::get('tasks/indicators', 'TaskController@indicators');
         Route::post('tasks/finishTask/{id}', 'TaskController@finishTask');
         Route::resource('tasks', 'TaskController');
 
@@ -60,7 +61,7 @@ Route::group([
         | MailReceiver Routes
         |--------------------------------------------------------------------------
         */
-        Route::post('mailReceivers/change/{id}', 'MailReceiverController@change');
+        Route::post('mailReceivers/change/{id}', 'MailReceiverController@changeMailReceiver');
         Route::resource('mailReceivers', 'MailReceiverController');
     });
 });
